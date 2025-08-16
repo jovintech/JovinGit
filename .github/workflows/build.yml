@@ -57,6 +57,7 @@ jobs:
       - name: Build with MSYS2
         shell: msys2 {0}
         run: |
+          export PKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig
           mkdir build-win
           cd build-win
           cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
