@@ -80,15 +80,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Instalar MinGW e CMake
-        run: sudo apt update && sudo apt install -y mingw-w64 cmake pkg-config
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          install: >-
+            base-devel
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-gtkmm3
+          msystem: MINGW64
 
-      - name: Build Windows (cross-compile)
+      - name: Build with MSYS2
+        shell: msys2 {0}
         run: |
-          cmake -B build-win -DCMAKE_TOOLCHAIN_FILE=toolchain-windows.cmake -DCMAKE_BUILD_TYPE=Release
+          cmake -B build-win -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
           cmake --build build-win --config Release
-          VERSION=${GITHUB_REF#refs/tags/}
-          mv build-win/JovinGit.exe build-win/JovinGit-${VERSION}.exe
 
       - name: Upload executável Windows no release
         uses: actions/upload-release-asset@v1
