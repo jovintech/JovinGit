@@ -24,7 +24,7 @@ jobs:
           sudo apt update
           sudo apt install -y cmake g++ pkg-config libgtkmm-3.0-dev
 
-      - name: Build
+      - name: Build Linux
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
@@ -72,6 +72,33 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build-windows:
+    runs-on: ubuntu-latest
+    needs: build-linux
+    if: github.ref_type == 'tag'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Instalar MinGW e CMake
+        run: sudo apt update && sudo apt install -y mingw-w64 cmake pkg-config
+
+      - name: Build Windows (cross-compile)
+        run: |
+          cmake -B build-win -DCMAKE_TOOLCHAIN_FILE=toolchain-windows.cmake -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-win --config Release
+          VERSION=${GITHUB_REF#refs/tags/}
+          mv build-win/JovinGit.exe build-win/JovinGit-${VERSION}.exe
+
+      - name: Upload executável Windows no release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build-win/JovinGit-${{ github.ref_name }}.exe
+          asset_name: JovinGit-${{ github.ref_name }}.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
 
       - name: Subir executável para o release
         uses: actions/upload-release-asset@v1
