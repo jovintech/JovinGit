@@ -72,9 +72,9 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  build-windows:
+  build-and-release-windows:
     runs-on: ubuntu-latest
-    needs: build-linux
+    needs: release
     if: github.ref_type == 'tag'
 
     steps:
